@@ -1,0 +1,5 @@
+package: github.com/rebuy-de/partial-deployment-cleanup
+import:
+- package: github.com/hashicorp/consul
+  subpackages:
+  - api

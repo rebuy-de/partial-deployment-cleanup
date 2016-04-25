@@ -1,18 +1,36 @@
 package kv
 
 import (
+	"bytes"
+	"io"
 	"testing"
 
 	"github.com/hashicorp/consul/testutil"
 )
 
-func TestGetProjects(t *testing.T) {
+func testHelperConsul(t *testing.T) (*testutil.TestServer, func()) {
+	var stdout io.Writer
+
+	if !testing.Verbose() {
+		stdout = &bytes.Buffer{}
+	} else {
+		stdout = nil
+	}
+
 	srv := testutil.NewTestServerConfig(t, func(c *testutil.TestServerConfig) {
 		c.Server = true
 		c.Bootstrap = true
-		c.LogLevel = "info"
+		c.Stdout = stdout
 	})
-	defer srv.Stop()
+
+	return srv, func() {
+		srv.Stop()
+	}
+}
+
+func TestGetProjects(t *testing.T) {
+	srv, def := testHelperConsul(t)
+	defer def()
 
 	agent = &srv.HTTPAddr
 
