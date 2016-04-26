@@ -1,6 +1,7 @@
 package kv
 
 import (
+	"encoding/json"
 	"flag"
 	"strings"
 
@@ -52,4 +53,39 @@ func (c *Client) GetProjects() ([]string, error) {
 	}
 
 	return keys, nil
+}
+
+func (c *Client) getDeployment(key string) (*Deployment, error) {
+	kv := c.client.KV()
+	pair, _, err := kv.Get(key, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var deployment Deployment
+	err = json.Unmarshal(pair.Value, &deployment)
+	if err != nil {
+		return nil, err
+	}
+
+	return &deployment, nil
+}
+
+func (c *Client) GetDeployments(project string) (Deployments, error) {
+	kv := c.client.KV()
+
+	pair, _, err := kv.Get(*namespace+project+"/deployments", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	//var deployments
+	_ = pair
+
+	return nil, nil
+
+}
+
+func (c *Client) RemoveDeployment(*Deployment) error {
+	return nil
 }

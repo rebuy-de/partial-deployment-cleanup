@@ -66,3 +66,17 @@ func TestGetProjects(t *testing.T) {
 		t.Fatalf("Got %#v\n", projects)
 	}
 }
+
+func TestGetDeployments(t *testing.T) {
+	srv, def := testHelperConsul(t)
+	defer def()
+
+	agent = &srv.HTTPAddr
+
+	srv.SetKV("nginx/partial_deployment/green-web/deployments/master", []byte(`
+		{
+			"branch": "master",
+			"created_at": 
+		}
+	`))
+}
