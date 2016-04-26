@@ -13,7 +13,7 @@ var (
 		"consul-namespace",
 		"nginx/partial_deployment/",
 		"Root namespace for Consul KV")
-	agent = flag.String(
+	Agent = flag.String(
 		"consul-agent",
 		"localhost:8500",
 		"")
@@ -25,7 +25,7 @@ type Client struct {
 
 func New() (*Client, error) {
 	config := api.DefaultConfig()
-	config.Address = *agent
+	config.Address = *Agent
 
 	client, err := api.NewClient(config)
 	if err != nil {
@@ -45,10 +45,15 @@ func (c *Client) GetProjects() ([]string, error) {
 		return nil, err
 	}
 
-	keys := make([]string, 0)
+	keyMap := make(map[string]bool)
 	for _, pair := range pairs {
 		key := strings.TrimPrefix(pair.Key, *namespace)
 		key = strings.Split(key, "/")[0]
+		keyMap[key] = true
+	}
+
+	keys := make([]string, 0)
+	for key, _ := range keyMap {
 		keys = append(keys, key)
 	}
 

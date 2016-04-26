@@ -33,9 +33,10 @@ func TestGetProjects(t *testing.T) {
 	srv, def := testHelperConsul(t)
 	defer def()
 
-	agent = &srv.HTTPAddr
+	Agent = &srv.HTTPAddr
 
 	srv.SetKV("nginx/partial_deployment/green-web/foo", []byte("bar"))
+	srv.SetKV("nginx/partial_deployment/green-web/blub", []byte("blubber"))
 	srv.SetKV("nginx/partial_deployment/blue-web/foo", []byte("bar"))
 
 	client, err := New()
@@ -72,7 +73,7 @@ func TestGetDeployments(t *testing.T) {
 	srv, def := testHelperConsul(t)
 	defer def()
 
-	agent = &srv.HTTPAddr
+	Agent = &srv.HTTPAddr
 
 	srv.SetKV("nginx/partial_deployment/green-web/deployments/master", []byte(`
 		{
@@ -118,7 +119,7 @@ func TestRemoveDeployments(t *testing.T) {
 	srv, def := testHelperConsul(t)
 	defer def()
 
-	agent = &srv.HTTPAddr
+	Agent = &srv.HTTPAddr
 
 	srv.SetKV("nginx/partial_deployment/green-web/deployments/master", []byte(`
 		{
