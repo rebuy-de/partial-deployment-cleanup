@@ -139,6 +139,7 @@ func TestRemoveDeployments(t *testing.T) {
 	}
 
 	deployment := Deployment{}
+	deployment.Project = "green-web"
 	deployment.Branch = "fancy"
 	client.RemoveDeployment(&deployment)
 

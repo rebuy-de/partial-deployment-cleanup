@@ -86,6 +86,9 @@ func (c *Client) GetDeployments(project string) (Deployments, error) {
 
 }
 
-func (c *Client) RemoveDeployment(*Deployment) error {
-	return nil
+func (c *Client) RemoveDeployment(d *Deployment) error {
+	key := *namespace + d.Project + "/deployments/" + d.Branch
+	kv := c.client.KV()
+	_, err := kv.Delete(key, nil)
+	return err
 }
