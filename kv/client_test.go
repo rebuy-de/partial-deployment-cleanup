@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/consul/testutil"
 )
@@ -75,8 +76,79 @@ func TestGetDeployments(t *testing.T) {
 
 	srv.SetKV("nginx/partial_deployment/green-web/deployments/master", []byte(`
 		{
-			"branch": "master",
-			"created_at": 
+			"created_at": "2012-04-23T18:25:43Z",
+			"updated_at": "2012-04-23T18:25:43Z"
 		}
 	`))
+
+	client, err := New()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	deployments, err := client.GetDeployments("green-web")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(deployments) != 1 {
+		t.Logf("%+v", deployments)
+		t.Fatalf("Expected 1 deployment, but got %d", len(deployments))
+	}
+
+	deployment := *deployments[0]
+
+	expect := Deployment{}
+	expect.Project = "green-web"
+	expect.Branch = "master"
+	expect.CreatedAt = time.Unix(1335205543, 0)
+	expect.UpdatedAt = time.Unix(1335205543, 0)
+
+	if deployment.Project != "green-web" ||
+		deployment.Branch != "master" ||
+		deployment.CreatedAt.Unix() != 1335205543 ||
+		deployment.UpdatedAt.Unix() != 1335205543 {
+		t.Logf("Actual: %#v", deployment)
+		t.Logf("Expect: %#v", expect)
+		t.Fatalf("Deployment doesn't equals expected value")
+	}
+}
+
+func TestRemoveDeployments(t *testing.T) {
+	srv, def := testHelperConsul(t)
+	defer def()
+
+	agent = &srv.HTTPAddr
+
+	srv.SetKV("nginx/partial_deployment/green-web/deployments/master", []byte(`
+		{
+			"created_at": "2012-04-23T18:25:43Z",
+			"updated_at": "2012-04-23T18:25:43Z"
+		}
+	`))
+	srv.SetKV("nginx/partial_deployment/green-web/deployments/fancy", []byte(`
+		{
+			"created_at": "2012-04-23T18:25:43Z",
+			"updated_at": "2012-04-23T18:25:43Z"
+		}
+	`))
+
+	client, err := New()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	deployment := Deployment{}
+	deployment.Branch = "fancy"
+	client.RemoveDeployment(&deployment)
+
+	keys := srv.ListKV("nginx/partial_deployment")
+	if len(keys) != 1 {
+		t.Logf("%#v", keys)
+		t.Fatalf("Expected 1 key, but got %d", len(keys))
+	}
+
+	if keys[0] != "nginx/partial_deployment/green-web/deployments/master" {
+		t.Fatalf("Deleted the wrong deployment.")
+	}
 }

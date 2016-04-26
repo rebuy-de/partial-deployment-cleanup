@@ -55,34 +55,34 @@ func (c *Client) GetProjects() ([]string, error) {
 	return keys, nil
 }
 
-func (c *Client) getDeployment(key string) (*Deployment, error) {
-	kv := c.client.KV()
-	pair, _, err := kv.Get(key, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var deployment Deployment
-	err = json.Unmarshal(pair.Value, &deployment)
-	if err != nil {
-		return nil, err
-	}
-
-	return &deployment, nil
-}
-
 func (c *Client) GetDeployments(project string) (Deployments, error) {
-	kv := c.client.KV()
+	ns := *namespace + project + "/deployments"
 
-	pair, _, err := kv.Get(*namespace+project+"/deployments", nil)
+	kv := c.client.KV()
+	pairs, _, err := kv.List(ns, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	//var deployments
-	_ = pair
+	deployments := make(Deployments, 0)
+	for _, pair := range pairs {
+		branch := strings.TrimPrefix(pair.Key, ns)
+		branch = strings.TrimLeft(branch, "/")
+		branch = strings.Split(branch, "/")[0]
 
-	return nil, nil
+		var deployment Deployment
+		err = json.Unmarshal(pair.Value, &deployment)
+		if err != nil {
+			return nil, err
+		}
+
+		deployment.Project = project
+		deployment.Branch = branch
+
+		deployments = append(deployments, &deployment)
+	}
+
+	return deployments, nil
 
 }
 
