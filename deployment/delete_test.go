@@ -32,6 +32,20 @@ func testHelperDeploymentDirectory(t *testing.T, project string, branch string) 
 }
 
 func TestDeploymentDelete(t *testing.T) {
+	tmp, fn := testHelperDeploymentDirectory(t, "proj", "fancy")
+	defer fn()
+
+	deploymentPath = &tmp
+	Delete("proj", "fancy")
+
+	dir := path.Join(tmp, "proj", "fancy")
+	if isDirectory(dir) {
+		t.Logf("`Delete` should have deleted '%s', but didn't.", dir)
+		t.Fail()
+	}
+}
+
+func TestDeploymentDeleteSkipMaster(t *testing.T) {
 	tmp, fn := testHelperDeploymentDirectory(t, "proj", "master")
 	defer fn()
 
@@ -39,22 +53,22 @@ func TestDeploymentDelete(t *testing.T) {
 	Delete("proj", "master")
 
 	dir := path.Join(tmp, "proj", "master")
-	if isDirectory(dir) {
-		t.Logf("`Delete` should have deleted '%s', but didn't.", dir)
+	if !isDirectory(dir) {
+		t.Logf("`Delete` shouldn't have deleted '%s', but did.", dir)
 		t.Fail()
 	}
 }
 
 func TestDeploymentDeleteSkip(t *testing.T) {
 	for _, sub := range []string{"current", "release", "shared"} {
-		tmp, fn := testHelperDeploymentDirectory(t, "proj", "master")
+		tmp, fn := testHelperDeploymentDirectory(t, "proj", "fancy")
 		defer fn()
 
-		os.Remove(path.Join(tmp, "proj", "master", sub))
+		os.Remove(path.Join(tmp, "proj", "fancy", sub))
 		deploymentPath = &tmp
-		Delete("proj", "master")
+		Delete("proj", "fancy")
 
-		dir := path.Join(tmp, "proj", "master")
+		dir := path.Join(tmp, "proj", "fancy")
 		if !isDirectory(dir) {
 			t.Logf("`Delete` shouldn't have deleted '%s', but did.", dir)
 			t.Fail()

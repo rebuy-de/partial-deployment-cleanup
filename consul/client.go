@@ -1,4 +1,4 @@
-package kv
+package consul
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 var (
 	namespace = flag.String(
 		"consul-namespace",
-		"nginx/partial_deployment/",
+		"nginx/partial-deployment/",
 		"Root namespace for Consul KV")
 	Agent = flag.String(
 		"consul-agent",

@@ -4,11 +4,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/rebuy-de/partial-deployment-cleanup/kv"
+	"github.com/rebuy-de/partial-deployment-cleanup/consul"
 )
 
 func DeleteOldBranchDefinitions() error {
-	client, err := kv.New()
+	client, err := consul.New()
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func DeleteOldBranchDefinitions() error {
 			age := time.Since(deployment.UpdatedAt)
 			log.Printf("Branch %s/%s is %s old.", project, deployment.Branch, age.String())
 			if cleanupThreshold < age {
-				log.Printf("Deleting branch %s/%s, because it is to old.",
+				log.Printf("Deleting branch %s/%s, because it is too old.",
 					project, deployment.Branch)
 				log.Printf("%#v\n", deployment)
 

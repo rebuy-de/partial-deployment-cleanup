@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/consul/testutil"
-	"github.com/rebuy-de/partial-deployment-cleanup/kv"
+	"github.com/rebuy-de/partial-deployment-cleanup/consul"
 )
 
 func testHelperConsul(t *testing.T) (*testutil.TestServer, func()) {
@@ -35,11 +35,11 @@ func TestRemoveDeployments(t *testing.T) {
 	srv, def := testHelperConsul(t)
 	defer def()
 
-	kv.Agent = &srv.HTTPAddr
+	consul.Agent = &srv.HTTPAddr
 
 	age := 4 * Week
 
-	oldDeployment := kv.Deployment{
+	oldDeployment := consul.Deployment{
 		"green-web",
 		"master",
 		time.Now(),
@@ -49,9 +49,9 @@ func TestRemoveDeployments(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	srv.SetKV("nginx/partial_deployment/green-web/deployments/master", b)
+	srv.SetKV("nginx/partial-deployment/green-web/deployments/master", b)
 
-	currentDeployment := kv.Deployment{
+	currentDeployment := consul.Deployment{
 		"green-web",
 		"fancy",
 		time.Now(),
@@ -61,17 +61,17 @@ func TestRemoveDeployments(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	srv.SetKV("nginx/partial_deployment/green-web/deployments/fancy", b)
+	srv.SetKV("nginx/partial-deployment/green-web/deployments/fancy", b)
 
 	DeleteOldBranchDefinitions()
 
-	keys := srv.ListKV("nginx/partial_deployment")
+	keys := srv.ListKV("nginx/partial-deployment")
 	if len(keys) != 1 {
 		t.Logf("%#v", keys)
 		t.Fatalf("Expected 1 key, but got %d", len(keys))
 	}
 
-	if keys[0] != "nginx/partial_deployment/green-web/deployments/fancy" {
+	if keys[0] != "nginx/partial-deployment/green-web/deployments/fancy" {
 		t.Fatalf("Deleted the wrong deployment.")
 	}
 }

@@ -14,6 +14,12 @@ var (
 func Delete(project, branch string) {
 	directory := getPath(project, branch)
 
+	if branch == "master" {
+		log.Printf(`Aborting deletion of directory '%s', `+
+			`because it is the master branch.`, directory)
+		return
+	}
+
 	for _, sub := range []string{"current", "release", "shared"} {
 		if !isDirectory(path.Join(directory, sub)) {
 			log.Printf(`Aborting deletion of directory '%s', `+

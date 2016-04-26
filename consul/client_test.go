@@ -1,4 +1,4 @@
-package kv
+package consul
 
 import (
 	"bytes"
@@ -35,9 +35,9 @@ func TestGetProjects(t *testing.T) {
 
 	Agent = &srv.HTTPAddr
 
-	srv.SetKV("nginx/partial_deployment/green-web/foo", []byte("bar"))
-	srv.SetKV("nginx/partial_deployment/green-web/blub", []byte("blubber"))
-	srv.SetKV("nginx/partial_deployment/blue-web/foo", []byte("bar"))
+	srv.SetKV("nginx/partial-deployment/green-web/foo", []byte("bar"))
+	srv.SetKV("nginx/partial-deployment/green-web/blub", []byte("blubber"))
+	srv.SetKV("nginx/partial-deployment/blue-web/foo", []byte("bar"))
 
 	client, err := New()
 	if err != nil {
@@ -75,7 +75,7 @@ func TestGetDeployments(t *testing.T) {
 
 	Agent = &srv.HTTPAddr
 
-	srv.SetKV("nginx/partial_deployment/green-web/deployments/master", []byte(`
+	srv.SetKV("nginx/partial-deployment/green-web/deployments/master", []byte(`
 		{
 			"created_at": "2012-04-23T18:25:43Z",
 			"updated_at": "2012-04-23T18:25:43Z"
@@ -121,13 +121,13 @@ func TestRemoveDeployments(t *testing.T) {
 
 	Agent = &srv.HTTPAddr
 
-	srv.SetKV("nginx/partial_deployment/green-web/deployments/master", []byte(`
+	srv.SetKV("nginx/partial-deployment/green-web/deployments/master", []byte(`
 		{
 			"created_at": "2012-04-23T18:25:43Z",
 			"updated_at": "2012-04-23T18:25:43Z"
 		}
 	`))
-	srv.SetKV("nginx/partial_deployment/green-web/deployments/fancy", []byte(`
+	srv.SetKV("nginx/partial-deployment/green-web/deployments/fancy", []byte(`
 		{
 			"created_at": "2012-04-23T18:25:43Z",
 			"updated_at": "2012-04-23T18:25:43Z"
@@ -144,13 +144,13 @@ func TestRemoveDeployments(t *testing.T) {
 	deployment.Branch = "fancy"
 	client.RemoveDeployment(&deployment)
 
-	keys := srv.ListKV("nginx/partial_deployment")
+	keys := srv.ListKV("nginx/partial-deployment")
 	if len(keys) != 1 {
 		t.Logf("%#v", keys)
 		t.Fatalf("Expected 1 key, but got %d", len(keys))
 	}
 
-	if keys[0] != "nginx/partial_deployment/green-web/deployments/master" {
+	if keys[0] != "nginx/partial-deployment/green-web/deployments/master" {
 		t.Fatalf("Deleted the wrong deployment.")
 	}
 }

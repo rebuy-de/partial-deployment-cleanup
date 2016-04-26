@@ -2,11 +2,15 @@
 
 Purges old branches and deployments
 
+## Primary responsible person (PRP)
+
+* [@prp-partial-deployment-cleanup](https://github.com/orgs/rebuy-de/teams/prp-partial-deployment-cleanup)
+
 ## Requirements
 
+* Go >= `1.6`
 * `glide` https://github.com/Masterminds/glide#install
-* Go >= `1.5`
-  + if you have version `1.5`, then you have to `export GO15VENDOREXPERIMENT=1`
+* since the test a starting a real Consul server, `consul` is required in your `$PATH`
 
 ## Build
 
@@ -17,7 +21,7 @@ Purges old branches and deployments
 ## Update dependencies
 
 1. update dependencies: `glide update`
-2. test everything: `go test ./...`
+2. test everything: `go test $(glide novendor)`
 3. debug: `vim`
 
 ## Use
