@@ -11,13 +11,11 @@ func TestGetProjects(t *testing.T) {
 	srv, def := testserver.Create(t)
 	defer def()
 
-	Agent = &srv.HTTPAddr
-
 	srv.SetKV("nginx/partial-deployment/green-web/foo", []byte("bar"))
 	srv.SetKV("nginx/partial-deployment/green-web/blub", []byte("blubber"))
 	srv.SetKV("nginx/partial-deployment/blue-web/foo", []byte("bar"))
 
-	client, err := New()
+	client, err := New(srv.HTTPAddr, "nginx/partial-deployment/")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -51,8 +49,6 @@ func TestGetDeployments(t *testing.T) {
 	srv, def := testserver.Create(t)
 	defer def()
 
-	Agent = &srv.HTTPAddr
-
 	srv.SetKV("nginx/partial-deployment/green-web/deployments/master", []byte(`
 		{
 			"created_at": "2012-04-23T18:25:43Z",
@@ -60,7 +56,7 @@ func TestGetDeployments(t *testing.T) {
 		}
 	`))
 
-	client, err := New()
+	client, err := New(srv.HTTPAddr, "nginx/partial-deployment/")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -97,8 +93,6 @@ func TestRemoveDeployments(t *testing.T) {
 	srv, def := testserver.Create(t)
 	defer def()
 
-	Agent = &srv.HTTPAddr
-
 	srv.SetKV("nginx/partial-deployment/green-web/deployments/master", []byte(`
 		{
 			"created_at": "2012-04-23T18:25:43Z",
@@ -112,7 +106,7 @@ func TestRemoveDeployments(t *testing.T) {
 		}
 	`))
 
-	client, err := New()
+	client, err := New(srv.HTTPAddr, "nginx/partial-deployment/")
 	if err != nil {
 		t.Fatal(err.Error())
 	}

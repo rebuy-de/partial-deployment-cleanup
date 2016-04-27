@@ -13,8 +13,6 @@ func TestRemoveDeployments(t *testing.T) {
 	srv, def := testserver.Create(t)
 	defer def()
 
-	consul.Agent = &srv.HTTPAddr
-
 	age := 4 * Week
 
 	oldDeployment := consul.Deployment{
@@ -41,7 +39,7 @@ func TestRemoveDeployments(t *testing.T) {
 	}
 	srv.SetKV("nginx/partial-deployment/green-web/deployments/fancy", b)
 
-	DeleteOldBranchDefinitions()
+	DeleteOldBranchDefinitions(srv.HTTPAddr, "nginx/partial-deployment/")
 
 	keys := srv.ListKV("nginx/partial-deployment")
 	if len(keys) != 1 {

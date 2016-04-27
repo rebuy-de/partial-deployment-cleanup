@@ -5,7 +5,6 @@ import (
 	"io"
 	"testing"
 
-	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/testutil"
 )
 
@@ -24,15 +23,9 @@ func Create(t *testing.T) (*testutil.TestServer, func()) {
 		c.Stdout = stdout
 	})
 
-	config := api.DefaultConfig()
-	config.Address = srv.HTTPAddr
-
-	client, err := api.NewClient(config)
-	if err != nil {
-		t.Fatal(err.Error())
+	if t.Skipped() {
+		t.FailNow()
 	}
-
-	client.KV().DeleteTree("/", nil)
 
 	return srv, func() {
 		srv.Stop()

@@ -7,8 +7,8 @@ import (
 	"github.com/rebuy-de/partial-deployment-cleanup/consul"
 )
 
-func DeleteOldBranchDefinitions() error {
-	client, err := consul.New()
+func DeleteOldBranchDefinitions(agent, namespace string) error {
+	client, err := consul.New(agent, namespace)
 	if err != nil {
 		return err
 	}

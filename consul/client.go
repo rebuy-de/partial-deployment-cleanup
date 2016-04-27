@@ -2,30 +2,19 @@ package consul
 
 import (
 	"encoding/json"
-	"flag"
 	"strings"
 
 	"github.com/hashicorp/consul/api"
 )
 
-var (
-	namespace = flag.String(
-		"consul-namespace",
-		"nginx/partial-deployment/",
-		"Root namespace for Consul KV")
-	Agent = flag.String(
-		"consul-agent",
-		"localhost:8500",
-		"")
-)
-
 type Client struct {
-	client *api.Client
+	namespace string
+	client    *api.Client
 }
 
-func New() (*Client, error) {
+func New(agent string, namespace string) (*Client, error) {
 	config := api.DefaultConfig()
-	config.Address = *Agent
+	config.Address = agent
 
 	client, err := api.NewClient(config)
 	if err != nil {
@@ -33,6 +22,7 @@ func New() (*Client, error) {
 	}
 
 	c := new(Client)
+	c.namespace = namespace
 	c.client = client
 
 	return c, nil
@@ -40,14 +30,14 @@ func New() (*Client, error) {
 
 func (c *Client) GetProjects() ([]string, error) {
 	kv := c.client.KV()
-	pairs, _, err := kv.List(*namespace, nil)
+	pairs, _, err := kv.List(c.namespace, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	keyMap := make(map[string]bool)
 	for _, pair := range pairs {
-		key := strings.TrimPrefix(pair.Key, *namespace)
+		key := strings.TrimPrefix(pair.Key, c.namespace)
 		key = strings.Split(key, "/")[0]
 		keyMap[key] = true
 	}
@@ -61,7 +51,7 @@ func (c *Client) GetProjects() ([]string, error) {
 }
 
 func (c *Client) GetDeployments(project string) (Deployments, error) {
-	ns := *namespace + project + "/deployments"
+	ns := c.namespace + project + "/deployments"
 
 	kv := c.client.KV()
 	pairs, _, err := kv.List(ns, nil)
@@ -92,7 +82,7 @@ func (c *Client) GetDeployments(project string) (Deployments, error) {
 }
 
 func (c *Client) RemoveDeployment(d *Deployment) error {
-	key := *namespace + d.Project + "/deployments/" + d.Branch
+	key := c.namespace + d.Project + "/deployments/" + d.Branch
 	kv := c.client.KV()
 	_, err := kv.Delete(key, nil)
 	return err

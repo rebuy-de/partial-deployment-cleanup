@@ -12,6 +12,15 @@ Purges old branches and deployments
 * `glide` https://github.com/Masterminds/glide#install
 * since the test a starting a real Consul server, `consul` is required in your `$PATH`
 
+## Testing
+
+```bash
+go test $(glide novendor) -p 1
+```
+
+* `glide novendor` lists all subpackages; otherwise `go` would also test `vendor/`
+* you have to disable parallel testing with `-p 1`; this is a limitation of `github.com/hashicorp/consul/testutil`
+
 ## Build
 
 1. download dependencies: `glide install`
@@ -26,4 +35,6 @@ Purges old branches and deployments
 
 ## Use
 
-* `./partial-deployment-cleanup -h`
+```bash
+./partial-deployment-cleanup -h
+```

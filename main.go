@@ -14,9 +14,20 @@ var (
 	cleanupThreshold = 2 * Week
 )
 
+var (
+	namespace = flag.String(
+		"consul-namespace",
+		"nginx/partial-deployment/",
+		"Root namespace for Consul KV")
+	agent = flag.String(
+		"consul-agent",
+		"localhost:8500",
+		"")
+)
+
 func main() {
 	flag.Parse()
-	DeleteOldBranchDefinitions()
+	DeleteOldBranchDefinitions(*agent, *namespace)
 }
 
 func Redistribute() {
