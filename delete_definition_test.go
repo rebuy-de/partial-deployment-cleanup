@@ -1,38 +1,16 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
 	"testing"
 	"time"
 
-	"github.com/hashicorp/consul/testutil"
 	"github.com/rebuy-de/partial-deployment-cleanup/consul"
+	"github.com/rebuy-de/partial-deployment-cleanup/consul/testserver"
 )
 
-func testHelperConsul(t *testing.T) (*testutil.TestServer, func()) {
-	var stdout io.Writer
-
-	if !testing.Verbose() {
-		stdout = &bytes.Buffer{}
-	} else {
-		stdout = nil
-	}
-
-	srv := testutil.NewTestServerConfig(t, func(c *testutil.TestServerConfig) {
-		c.Server = true
-		c.Bootstrap = true
-		c.Stdout = stdout
-	})
-
-	return srv, func() {
-		srv.Stop()
-	}
-}
-
 func TestRemoveDeployments(t *testing.T) {
-	srv, def := testHelperConsul(t)
+	srv, def := testserver.Create(t)
 	defer def()
 
 	consul.Agent = &srv.HTTPAddr
