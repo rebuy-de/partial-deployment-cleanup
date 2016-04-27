@@ -11,4 +11,4 @@ type Deployment struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-type Distribution map[int]string
+type Distribution map[string]string

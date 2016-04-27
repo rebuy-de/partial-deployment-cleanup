@@ -1,6 +1,7 @@
 package consul
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -125,4 +126,43 @@ func TestRemoveDeployments(t *testing.T) {
 	if keys[0] != "nginx/partial-deployment/green-web/deployments/master" {
 		t.Fatalf("Deleted the wrong deployment.")
 	}
+}
+
+func TestGetDistribution(t *testing.T) {
+	srv, def := testserver.Create(t)
+	defer def()
+
+	srv.SetKV("nginx/partial-deployment/blue-web/distribution", []byte(`
+		{
+			"1":"fancy",
+			"2":"fancy",
+			"3":"fancy",
+			"4":"master",
+			"5":"master"
+		}
+	`))
+
+	client, err := New(srv.HTTPAddr, "nginx/partial-deployment")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	distribution, err := client.GetDistribution("blue-web")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	expect := Distribution{
+		"1": "fancy",
+		"2": "fancy",
+		"3": "fancy",
+		"4": "master",
+	}
+
+	if !reflect.DeepEqual(expect, distribution) {
+		t.Errorf("Result has the wrong length. Wanted 5.")
+		t.Errorf("%#v", distribution)
+		t.FailNow()
+	}
+
 }

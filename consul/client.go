@@ -85,5 +85,17 @@ func (c *Client) RemoveDeployment(d *Deployment) error {
 }
 
 func (c *Client) GetDistribution(project string) (Distribution, error) {
-	return nil, nil
+	key := c.namespace.Add(project).Add("distribution")
+	pair, _, err := c.client.KV().Get(key.Clean(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var distribution Distribution
+	err = json.Unmarshal(pair.Value, &distribution)
+	if err != nil {
+		return nil, err
+	}
+
+	return distribution, nil
 }
