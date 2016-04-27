@@ -7,7 +7,7 @@ import (
 	"github.com/rebuy-de/partial-deployment-cleanup/consul"
 )
 
-func DeleteOldBranchDefinitions(agent, namespace string) error {
+func DeleteOldBranchDefinitions(agent string, namespace consul.Key) error {
 	client, err := consul.New(agent, namespace)
 	if err != nil {
 		return err
@@ -32,7 +32,6 @@ func DeleteOldBranchDefinitions(agent, namespace string) error {
 			if cleanupThreshold < age {
 				log.Printf("Deleting branch %s/%s, because it is too old.",
 					project, deployment.Branch)
-				log.Printf("%#v\n", deployment)
 
 				err = client.RemoveDeployment(deployment)
 				if err != nil {

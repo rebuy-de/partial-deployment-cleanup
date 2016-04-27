@@ -2,17 +2,16 @@ package consul
 
 import (
 	"encoding/json"
-	"strings"
 
 	"github.com/hashicorp/consul/api"
 )
 
 type Client struct {
-	namespace string
+	namespace Key
 	client    *api.Client
 }
 
-func New(agent string, namespace string) (*Client, error) {
+func New(agent string, namespace Key) (*Client, error) {
 	config := api.DefaultConfig()
 	config.Address = agent
 
@@ -30,15 +29,14 @@ func New(agent string, namespace string) (*Client, error) {
 
 func (c *Client) GetProjects() ([]string, error) {
 	kv := c.client.KV()
-	pairs, _, err := kv.List(c.namespace, nil)
+	pairs, _, err := kv.List(string(c.namespace), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	keyMap := make(map[string]bool)
 	for _, pair := range pairs {
-		key := strings.TrimPrefix(pair.Key, c.namespace)
-		key = strings.Split(key, "/")[0]
+		key := Key(pair.Key).Base(c.namespace).Get(0)
 		keyMap[key] = true
 	}
 
@@ -51,19 +49,17 @@ func (c *Client) GetProjects() ([]string, error) {
 }
 
 func (c *Client) GetDeployments(project string) (Deployments, error) {
-	ns := c.namespace + project + "/deployments"
+	ns := c.namespace.Add(project).Add("deployments")
 
 	kv := c.client.KV()
-	pairs, _, err := kv.List(ns, nil)
+	pairs, _, err := kv.List(string(ns), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	deployments := make(Deployments, 0)
 	for _, pair := range pairs {
-		branch := strings.TrimPrefix(pair.Key, ns)
-		branch = strings.TrimLeft(branch, "/")
-		branch = strings.Split(branch, "/")[0]
+		branch := Key(pair.Key).Base(ns).Get(0)
 
 		var deployment Deployment
 		err = json.Unmarshal(pair.Value, &deployment)
@@ -82,8 +78,12 @@ func (c *Client) GetDeployments(project string) (Deployments, error) {
 }
 
 func (c *Client) RemoveDeployment(d *Deployment) error {
-	key := c.namespace + d.Project + "/deployments/" + d.Branch
+	key := c.namespace.Add(d.Project).Add("deployments").Add(d.Branch)
 	kv := c.client.KV()
-	_, err := kv.Delete(key, nil)
+	_, err := kv.Delete(string(key), nil)
 	return err
+}
+
+func (c *Client) GetDistribution(project string) (Distribution, error) {
+	return nil, nil
 }

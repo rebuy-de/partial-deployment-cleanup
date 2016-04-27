@@ -39,11 +39,11 @@ func TestRemoveDeployments(t *testing.T) {
 	}
 	srv.SetKV("nginx/partial-deployment/green-web/deployments/fancy", b)
 
-	DeleteOldBranchDefinitions(srv.HTTPAddr, "nginx/partial-deployment/")
+	DeleteOldBranchDefinitions(srv.HTTPAddr, consul.Key("nginx/partial-deployment"))
 
 	keys := srv.ListKV("nginx/partial-deployment")
 	if len(keys) != 1 {
-		t.Logf("%#v", keys)
+		t.Logf("%+v", keys)
 		t.Fatalf("Expected 1 key, but got %d", len(keys))
 	}
 
