@@ -1,9 +1,11 @@
 package main
 
 import (
-	"flag"
+	"log"
+	"os"
 	"time"
 
+	"github.com/codegangsta/cli"
 	"github.com/rebuy-de/partial-deployment-cleanup/consul"
 )
 
@@ -17,20 +19,39 @@ var (
 )
 
 func main() {
-	var (
-		namespace = flag.String(
-			"consul-namespace",
-			"nginx/partial-deployment/",
-			"Root namespace for Consul KV.")
-		agent = flag.String(
-			"consul-agent",
-			"localhost:8500",
-			"Host and port of the Consul agent. Should only be changed for development purposes.")
-	)
-	flag.Parse()
+	app := cli.NewApp()
+	app.Name = "partial-deployment-cleanup"
+	app.Usage = "Purges old branches and deployments"
 
-	DeleteOldBranchDefinitions(*agent, consul.Key(*namespace))
-}
+	app.Commands = []cli.Command{
+		{
+			Name:    "consul",
+			Aliases: []string{"a"},
+			Usage:   "cleanup old deployments from Consul",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "namespace",
+					Value: "nginx/partial-deployment",
+					Usage: "Root namespace for Consul KV.",
+				},
+				cli.StringFlag{
+					Name:  "agent",
+					Value: "localhost:8500",
+					Usage: "Host and port of the Consul agent. Should only be changed for development purposes.",
+				},
+			},
+			Action: func(c *cli.Context) {
+				agent := c.String("agent")
+				namespace := c.String("namespace")
 
-func DeleteOldBranchDeployments() {
+				err := CleanupConsul(agent, consul.Key(namespace))
+				if err != nil {
+					log.Print(err.Error())
+					os.Exit(1)
+				}
+			},
+		},
+	}
+
+	app.Run(os.Args)
 }

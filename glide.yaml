@@ -3,3 +3,5 @@ import:
 - package: github.com/hashicorp/consul
   subpackages:
   - api
+  - testutil
+- package: github.com/codegangsta/cli

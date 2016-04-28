@@ -10,7 +10,7 @@ import (
 	"github.com/rebuy-de/partial-deployment-cleanup/consul/testserver"
 )
 
-func TestRemoveDeployments(t *testing.T) {
+func TestCleanupConsul(t *testing.T) {
 	srv, def := testserver.Create(t)
 	defer def()
 
@@ -61,7 +61,7 @@ func TestRemoveDeployments(t *testing.T) {
 		}
 	`))
 
-	err := DeleteOldBranchDefinitions(srv.HTTPAddr, consul.Key("nginx/partial-deployment"))
+	err := CleanupConsul(srv.HTTPAddr, consul.Key("nginx/partial-deployment"))
 
 	if err != nil {
 		t.Fatal(err.Error())
