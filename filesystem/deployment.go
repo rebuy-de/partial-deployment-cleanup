@@ -1,6 +1,7 @@
 package filesystem
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -9,7 +10,7 @@ import (
 type Deployment string
 
 func (d *Deployment) Delete(project, branch string) {
-	directory := d.getPath(project, branch)
+	directory := path.Join(string(*d), project, branch)
 
 	if branch == "master" {
 		log.Printf(`Aborting deletion of directory '%s', `+
@@ -29,10 +30,6 @@ func (d *Deployment) Delete(project, branch string) {
 	os.RemoveAll(directory)
 }
 
-func (d *Deployment) getPath(project, branch string) string {
-	return path.Join(string(*d), project, branch)
-}
-
 func isDirectory(path string) bool {
 	fileInfo, err := os.Stat(path)
 	if err != nil {
@@ -40,4 +37,20 @@ func isDirectory(path string) bool {
 	}
 
 	return fileInfo.IsDir()
+}
+
+func (d *Deployment) ListBranches(project string) ([]string, error) {
+	directory := path.Join(string(*d), project)
+
+	fileInfos, err := ioutil.ReadDir(directory)
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, fi := range fileInfos {
+		branches = append(branches, fi.Name())
+	}
+
+	return branches, nil
 }

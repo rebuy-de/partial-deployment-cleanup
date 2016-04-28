@@ -4,31 +4,28 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"reflect"
 	"testing"
 )
 
-func testHelperTempDir(t *testing.T, project string, branch string) (string, func()) {
+func testHelperDeploymentDirectory(t *testing.T, project string, branches ...string) (string, func()) {
 	tmp, err := ioutil.TempDir("", "pdtest")
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
 
-	os.MkdirAll(path.Join(tmp, project, branch), 0755)
+	for _, branch := range branches {
+		os.MkdirAll(path.Join(tmp, project, branch), 0755)
+
+		for _, sub := range []string{"current", "release", "shared"} {
+			os.Mkdir(path.Join(tmp, project, branch, sub), 0755)
+		}
+	}
 
 	return tmp, func() {
 		os.RemoveAll(tmp)
 	}
-}
-
-func testHelperDeploymentDirectory(t *testing.T, project string, branch string) (string, func()) {
-	tmp, fn := testHelperTempDir(t, project, branch)
-
-	for _, sub := range []string{"current", "release", "shared"} {
-		os.Mkdir(path.Join(tmp, project, branch, sub), 0755)
-	}
-
-	return tmp, fn
 }
 
 func TestDeploymentDelete(t *testing.T) {
@@ -73,5 +70,23 @@ func TestDeploymentDeleteSkip(t *testing.T) {
 			t.Logf("`Delete` shouldn't have deleted '%s', but did.", dir)
 			t.Fail()
 		}
+	}
+}
+
+func TestList(t *testing.T) {
+	tmp, def := testHelperDeploymentDirectory(t, "proj", "fancy", "master", "foo", "bar")
+	defer def()
+
+	deployment := Deployment(tmp)
+	branches, err := deployment.ListBranches("proj")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	expect := []string{"bar", "fancy", "foo", "master"}
+
+	if !reflect.DeepEqual(branches, expect) {
+		t.Errorf("Expected: %#v", expect)
+		t.Errorf("Obtained: %#v", branches)
 	}
 }
