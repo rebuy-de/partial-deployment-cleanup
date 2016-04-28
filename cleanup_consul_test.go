@@ -7,15 +7,14 @@ import (
 	"time"
 
 	"github.com/rebuy-de/partial-deployment-cleanup/consul"
-	"github.com/rebuy-de/partial-deployment-cleanup/consul/testserver"
+	"github.com/rebuy-de/partial-deployment-cleanup/testutil"
 )
 
 func TestCleanupConsul(t *testing.T) {
-	srv, def := testserver.Create(t)
-	defer def()
+	srv := testutil.CreateServer(t)
+	defer srv.Stop()
 
-	testserver.SetJSON(
-		t, srv,
+	srv.SetJSON(
 		"nginx/partial-deployment/green-web/deployments/master",
 		consul.Deployment{
 			"green-web",
@@ -23,8 +22,7 @@ func TestCleanupConsul(t *testing.T) {
 			time.Now(),
 			time.Now().Add(-4 * Week),
 		})
-	testserver.SetJSON(
-		t, srv,
+	srv.SetJSON(
 		"nginx/partial-deployment/green-web/deployments/old",
 		consul.Deployment{
 			"green-web",
@@ -32,8 +30,7 @@ func TestCleanupConsul(t *testing.T) {
 			time.Now(),
 			time.Now().Add(-4 * Week),
 		})
-	testserver.SetJSON(
-		t, srv,
+	srv.SetJSON(
 		"nginx/partial-deployment/green-web/deployments/ancient",
 		consul.Deployment{
 			"green-web",
@@ -41,8 +38,7 @@ func TestCleanupConsul(t *testing.T) {
 			time.Now(),
 			time.Now().Add(-8 * Week),
 		})
-	testserver.SetJSON(
-		t, srv,
+	srv.SetJSON(
 		"nginx/partial-deployment/green-web/deployments/fancy:",
 		consul.Deployment{
 			"green-web",
@@ -51,18 +47,16 @@ func TestCleanupConsul(t *testing.T) {
 			time.Now(),
 		})
 
-	srv.SetKV("nginx/partial-deployment/green-web/distribution", []byte(`
-		{
+	srv.Set("nginx/partial-deployment/green-web/distribution",
+		`{
 			"1":"fancy",
 			"2":"fancy",
 			"3":"fancy",
 			"4":"old",
 			"5":"old"
-		}
-	`))
+		}`)
 
-	err := CleanupConsul(srv.HTTPAddr, consul.Key("nginx/partial-deployment"))
-
+	err := CleanupConsul(srv.Addr(), consul.Key("nginx/partial-deployment"))
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -72,7 +66,7 @@ func TestCleanupConsul(t *testing.T) {
 		"nginx/partial-deployment/green-web/deployments/master",
 		"nginx/partial-deployment/green-web/deployments/old",
 	}
-	obtain := srv.ListKV("nginx/partial-deployment/green-web/deployments")
+	obtain := srv.List("nginx/partial-deployment/green-web/deployments")
 	sort.Sort(sort.StringSlice(obtain))
 
 	if reflect.DeepEqual(expect, obtain) {

@@ -22,29 +22,49 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "partial-deployment-cleanup"
 	app.Usage = "Purges old branches and deployments"
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "namespace",
+			Value: "nginx/partial-deployment",
+			Usage: "Root namespace for Consul KV.",
+		},
+		cli.StringFlag{
+			Name:  "agent",
+			Value: "localhost:8500",
+			Usage: "Host and port of the Consul agent. Should only be changed for development purposes.",
+		},
+	}
 
 	app.Commands = []cli.Command{
 		{
-			Name:    "consul",
-			Aliases: []string{"a"},
-			Usage:   "cleanup old deployments from Consul",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:  "namespace",
-					Value: "nginx/partial-deployment",
-					Usage: "Root namespace for Consul KV.",
-				},
-				cli.StringFlag{
-					Name:  "agent",
-					Value: "localhost:8500",
-					Usage: "Host and port of the Consul agent. Should only be changed for development purposes.",
-				},
-			},
+			Name:  "consul",
+			Usage: "cleanup old deployments from Consul",
 			Action: func(c *cli.Context) {
 				agent := c.String("agent")
 				namespace := c.String("namespace")
 
 				err := CleanupConsul(agent, consul.Key(namespace))
+				if err != nil {
+					log.Print(err.Error())
+					os.Exit(1)
+				}
+			},
+		},
+		{
+			Name:  "filesystem",
+			Usage: "cleanup old deployments from filesystem",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "path",
+					Usage: "path for the deployment directory",
+				},
+			},
+			Action: func(c *cli.Context) {
+				agent := c.String("agent")
+				namespace := c.String("namespace")
+				path := c.String("path")
+
+				err := CleanupFilesystem(agent, consul.Key(namespace), path)
 				if err != nil {
 					log.Print(err.Error())
 					os.Exit(1)

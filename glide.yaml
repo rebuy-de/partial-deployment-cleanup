@@ -1,7 +1,9 @@
 package: github.com/rebuy-de/partial-deployment-cleanup
 import:
 - package: github.com/hashicorp/consul
+  version: ^v0.6.4
   subpackages:
   - api
   - testutil
 - package: github.com/codegangsta/cli
+  version: ^v1.14.0

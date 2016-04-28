@@ -5,18 +5,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rebuy-de/partial-deployment-cleanup/consul/testserver"
+	"github.com/rebuy-de/partial-deployment-cleanup/testutil"
 )
 
 func TestGetProjects(t *testing.T) {
-	srv, def := testserver.Create(t)
-	defer def()
+	srv := testutil.CreateServer(t)
+	defer srv.Stop()
 
-	srv.SetKV("nginx/partial-deployment/green-web/foo", []byte("bar"))
-	srv.SetKV("nginx/partial-deployment/green-web/blub", []byte("blubber"))
-	srv.SetKV("nginx/partial-deployment/blue-web/foo", []byte("bar"))
+	srv.Set("nginx/partial-deployment/green-web/foo", "bar")
+	srv.Set("nginx/partial-deployment/green-web/blub", "blubber")
+	srv.Set("nginx/partial-deployment/blue-web/foo", "bar")
 
-	client, err := New(srv.HTTPAddr, "nginx/partial-deployment/")
+	client, err := New(srv.Addr(), "nginx/partial-deployment/")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -47,17 +47,16 @@ func TestGetProjects(t *testing.T) {
 }
 
 func TestGetDeployments(t *testing.T) {
-	srv, def := testserver.Create(t)
-	defer def()
+	srv := testutil.CreateServer(t)
+	defer srv.Stop()
 
-	srv.SetKV("nginx/partial-deployment/green-web/deployments/master", []byte(`
-		{
+	srv.Set("nginx/partial-deployment/green-web/deployments/master",
+		`{
 			"created_at": "2012-04-23T18:25:43Z",
 			"updated_at": "2012-04-23T18:25:43Z"
-		}
-	`))
+		}`)
 
-	client, err := New(srv.HTTPAddr, "nginx/partial-deployment/")
+	client, err := New(srv.Addr(), "nginx/partial-deployment/")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -91,23 +90,21 @@ func TestGetDeployments(t *testing.T) {
 }
 
 func TestRemoveDeployments(t *testing.T) {
-	srv, def := testserver.Create(t)
-	defer def()
+	srv := testutil.CreateServer(t)
+	defer srv.Stop()
 
-	srv.SetKV("nginx/partial-deployment/green-web/deployments/master", []byte(`
-		{
+	srv.Set("nginx/partial-deployment/green-web/deployments/master",
+		`{
 			"created_at": "2012-04-23T18:25:43Z",
 			"updated_at": "2012-04-23T18:25:43Z"
-		}
-	`))
-	srv.SetKV("nginx/partial-deployment/green-web/deployments/fancy", []byte(`
-		{
+		}`)
+	srv.Set("nginx/partial-deployment/green-web/deployments/fancy",
+		`{
 			"created_at": "2012-04-23T18:25:43Z",
 			"updated_at": "2012-04-23T18:25:43Z"
-		}
-	`))
+		}`)
 
-	client, err := New(srv.HTTPAddr, "nginx/partial-deployment/")
+	client, err := New(srv.Addr(), "nginx/partial-deployment/")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -117,7 +114,7 @@ func TestRemoveDeployments(t *testing.T) {
 	deployment.Branch = "fancy"
 	client.RemoveDeployment(&deployment)
 
-	keys := srv.ListKV("nginx/partial-deployment")
+	keys := srv.List("nginx/partial-deployment")
 	if len(keys) != 1 {
 		t.Logf("%#v", keys)
 		t.Fatalf("Expected 1 key, but got %d", len(keys))
@@ -129,20 +126,19 @@ func TestRemoveDeployments(t *testing.T) {
 }
 
 func TestGetDistribution(t *testing.T) {
-	srv, def := testserver.Create(t)
-	defer def()
+	srv := testutil.CreateServer(t)
+	defer srv.Stop()
 
-	srv.SetKV("nginx/partial-deployment/blue-web/distribution", []byte(`
-		{
+	srv.Set("nginx/partial-deployment/blue-web/distribution",
+		`{
 			"1":"fancy",
 			"2":"fancy",
 			"3":"fancy",
 			"4":"master",
 			"5":"master"
-		}
-	`))
+		}`)
 
-	client, err := New(srv.HTTPAddr, "nginx/partial-deployment")
+	client, err := New(srv.Addr(), "nginx/partial-deployment")
 	if err != nil {
 		t.Fatal(err.Error())
 	}

@@ -1,5 +1,5 @@
-hash: 05e4c2a0e8421a867147ac1ac56503f15938809bf9f2045f138c6fd6683d642c
-updated: 2016-04-28T11:51:41.565946194+02:00
+hash: 23e7109f1e72e3f20bf3adaa9e06da8b6da55d132a4c2acd00a52e53fd94ef41
+updated: 2016-04-28T13:59:37.868745359+02:00
 imports:
 - name: github.com/armon/circbuf
   version: bbbad097214e2918d8543d5201d12bfd7bca254d
@@ -12,9 +12,9 @@ imports:
 - name: github.com/bgentry/speakeasy
   version: 36e9cfdd690967f4f690c6edcc9ffacd006014a0
 - name: github.com/boltdb/bolt
-  version: c6ba97b89e0454fec9aa92e1d33a4e2c5fc1f631
+  version: ee4a0888a9abe7eefe5a0992ca4cb06864839873
 - name: github.com/codegangsta/cli
-  version: 4733699ce30faa633c4db36ebfbe427963593d7d
+  version: 71f57d300dd6a780ac1856c005c4b518cfd498ec
 - name: github.com/DataDog/datadog-go
   version: b050cd8f4d7c394545fd7d966c8e2909ce89d552
   subpackages:
@@ -42,7 +42,7 @@ imports:
   - external/golang.org/x/net/context
   - external/golang.org/x/sys/unix
 - name: github.com/hashicorp/consul
-  version: c0f98271ee1c93da6ee09d3b22c8b3439c0a6988
+  version: 26a0ef8c41aa2252ab4cf0844fc6470c8e1d8256
   subpackages:
   - api
   - testutil
@@ -55,8 +55,6 @@ imports:
   - consul/state
   - tlsutil
   - acl
-  - consul/agent
-  - consul/servers
   - consul/prepared_query
 - name: github.com/hashicorp/errwrap
   version: 7554cd9344cec97297fa6649b055a8c98c2a1e55
