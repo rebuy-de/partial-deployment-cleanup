@@ -18,7 +18,7 @@ func CleanupConsul(agent string, namespace consul.Key) error {
 		return err
 	}
 
-	log.Printf("Cleaning up these projects: %#v\n", projects)
+	log.Printf("Cleaning up these projects: %+v\n", projects)
 
 	for _, project := range projects {
 		deployments, err := client.GetDeployments(project)

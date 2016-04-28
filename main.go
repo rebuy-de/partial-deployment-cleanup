@@ -21,17 +21,18 @@ var (
 func main() {
 	app := cli.NewApp()
 	app.Name = "partial-deployment-cleanup"
-	app.Usage = "Purges old branches and deployments"
+	app.Usage = "purges old branches and deployments"
+	app.HideVersion = true
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "namespace",
 			Value: "nginx/partial-deployment",
-			Usage: "Root namespace for Consul KV.",
+			Usage: "root namespace for Consul KV",
 		},
 		cli.StringFlag{
 			Name:  "agent",
 			Value: "localhost:8500",
-			Usage: "Host and port of the Consul agent. Should only be changed for development purposes.",
+			Usage: "host and port of the Consul agent. Should only be changed for development purposes",
 		},
 	}
 
