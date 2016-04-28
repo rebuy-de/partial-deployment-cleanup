@@ -1,4 +1,4 @@
-package deployment
+package filesystem
 
 import (
 	"io/ioutil"
@@ -35,8 +35,8 @@ func TestDeploymentDelete(t *testing.T) {
 	tmp, fn := testHelperDeploymentDirectory(t, "proj", "fancy")
 	defer fn()
 
-	deploymentPath = &tmp
-	Delete("proj", "fancy")
+	deployment := Deployment(tmp)
+	deployment.Delete("proj", "fancy")
 
 	dir := path.Join(tmp, "proj", "fancy")
 	if isDirectory(dir) {
@@ -49,8 +49,8 @@ func TestDeploymentDeleteSkipMaster(t *testing.T) {
 	tmp, fn := testHelperDeploymentDirectory(t, "proj", "master")
 	defer fn()
 
-	deploymentPath = &tmp
-	Delete("proj", "master")
+	deployment := Deployment(tmp)
+	deployment.Delete("proj", "master")
 
 	dir := path.Join(tmp, "proj", "master")
 	if !isDirectory(dir) {
@@ -65,8 +65,8 @@ func TestDeploymentDeleteSkip(t *testing.T) {
 		defer fn()
 
 		os.Remove(path.Join(tmp, "proj", "fancy", sub))
-		deploymentPath = &tmp
-		Delete("proj", "fancy")
+		deployment := Deployment(tmp)
+		deployment.Delete("proj", "fancy")
 
 		dir := path.Join(tmp, "proj", "fancy")
 		if !isDirectory(dir) {

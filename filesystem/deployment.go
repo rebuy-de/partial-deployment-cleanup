@@ -1,18 +1,15 @@
-package deployment
+package filesystem
 
 import (
-	"flag"
 	"log"
 	"os"
 	"path"
 )
 
-var (
-	deploymentPath = flag.String("deployment-path", "/opt/www", "")
-)
+type Deployment string
 
-func Delete(project, branch string) {
-	directory := getPath(project, branch)
+func (d *Deployment) Delete(project, branch string) {
+	directory := d.getPath(project, branch)
 
 	if branch == "master" {
 		log.Printf(`Aborting deletion of directory '%s', `+
@@ -32,8 +29,8 @@ func Delete(project, branch string) {
 	os.RemoveAll(directory)
 }
 
-func getPath(project, branch string) string {
-	return path.Join(*deploymentPath, project, branch)
+func (d *Deployment) getPath(project, branch string) string {
+	return path.Join(string(*d), project, branch)
 }
 
 func isDirectory(path string) bool {
