@@ -93,7 +93,7 @@ func (c *Client) GetDistribution(project string) (Distribution, error) {
 	}
 
 	if pair == nil {
-		return nil, fmt.Errorf("Distribution does not exist.")
+		return nil, fmt.Errorf("Didn't find a Distribution in namespace %s.", c.namespace)
 	}
 
 	var distribution Distribution
