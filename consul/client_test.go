@@ -157,11 +157,13 @@ func TestGetDistribution(t *testing.T) {
 		"2": "fancy",
 		"3": "fancy",
 		"4": "master",
+		"5": "master",
 	}
 
 	if !reflect.DeepEqual(expect, distribution) {
-		t.Errorf("Result has the wrong length. Wanted 5.")
-		t.Errorf("%#v", distribution)
+		t.Errorf("Result does not have the expected value.")
+		t.Errorf("Expected: %#v", expect)
+		t.Errorf("Obtained: %#v", distribution)
 		t.FailNow()
 	}
 

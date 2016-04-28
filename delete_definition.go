@@ -26,17 +26,38 @@ func DeleteOldBranchDefinitions(agent string, namespace consul.Key) error {
 			return err
 		}
 
+		distribution, err := client.GetDistribution(project)
+		if err != nil {
+			return err
+		}
+
 		for _, deployment := range deployments {
 			age := time.Since(deployment.UpdatedAt)
-			log.Printf("Branch %s/%s is %s old.", project, deployment.Branch, age.String())
-			if cleanupThreshold < age {
-				log.Printf("Deleting branch %s/%s, because it is too old.",
-					project, deployment.Branch)
 
-				err = client.RemoveDeployment(deployment)
-				if err != nil {
-					return err
-				}
+			if deployment.Branch == "master" {
+				log.Printf("Keep branch %s/%s, because it is master.",
+					project, deployment.Branch)
+				continue
+			}
+
+			if cleanupThreshold > age {
+				log.Printf("Keep branch %s/%s, because it is only %s old.",
+					project, deployment.Branch, age.String())
+				continue
+			}
+
+			if distribution.Contains(deployment.Branch) {
+				log.Printf("Keep branch %s/%s, because it is still listed in the distibution.",
+					project, deployment.Branch)
+				continue
+			}
+
+			log.Printf("Deleting branch %s/%s, because it is %s old and is not listed in the distribution, anymore.",
+				project, deployment.Branch, age.String())
+
+			err = client.RemoveDeployment(deployment)
+			if err != nil {
+				return err
 			}
 		}
 	}

@@ -2,6 +2,7 @@ package consul
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/hashicorp/consul/api"
 )
@@ -89,6 +90,10 @@ func (c *Client) GetDistribution(project string) (Distribution, error) {
 	pair, _, err := c.client.KV().Get(key.Clean(), nil)
 	if err != nil {
 		return nil, err
+	}
+
+	if pair == nil {
+		return nil, fmt.Errorf("Distribution does not exist.")
 	}
 
 	var distribution Distribution

@@ -1,7 +1,8 @@
 package main
 
 import (
-	"encoding/json"
+	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -13,41 +14,70 @@ func TestRemoveDeployments(t *testing.T) {
 	srv, def := testserver.Create(t)
 	defer def()
 
-	age := 4 * Week
+	testserver.SetJSON(
+		t, srv,
+		"nginx/partial-deployment/green-web/deployments/master",
+		consul.Deployment{
+			"green-web",
+			"master",
+			time.Now(),
+			time.Now().Add(-4 * Week),
+		})
+	testserver.SetJSON(
+		t, srv,
+		"nginx/partial-deployment/green-web/deployments/old",
+		consul.Deployment{
+			"green-web",
+			"old",
+			time.Now(),
+			time.Now().Add(-4 * Week),
+		})
+	testserver.SetJSON(
+		t, srv,
+		"nginx/partial-deployment/green-web/deployments/ancient",
+		consul.Deployment{
+			"green-web",
+			"ancient",
+			time.Now(),
+			time.Now().Add(-8 * Week),
+		})
+	testserver.SetJSON(
+		t, srv,
+		"nginx/partial-deployment/green-web/deployments/fancy:",
+		consul.Deployment{
+			"green-web",
+			"fancy",
+			time.Now(),
+			time.Now(),
+		})
 
-	oldDeployment := consul.Deployment{
-		"green-web",
-		"master",
-		time.Now(),
-		time.Now().Add(-1 * age),
-	}
-	b, err := json.Marshal(oldDeployment)
+	srv.SetKV("nginx/partial-deployment/green-web/distribution", []byte(`
+		{
+			"1":"fancy",
+			"2":"fancy",
+			"3":"fancy",
+			"4":"old",
+			"5":"old"
+		}
+	`))
+
+	err := DeleteOldBranchDefinitions(srv.HTTPAddr, consul.Key("nginx/partial-deployment"))
+
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	srv.SetKV("nginx/partial-deployment/green-web/deployments/master", b)
 
-	currentDeployment := consul.Deployment{
-		"green-web",
-		"fancy",
-		time.Now(),
-		time.Now(),
+	expect := []string{
+		"nginx/partial-deployment/green-web/deployments/fancy",
+		"nginx/partial-deployment/green-web/deployments/master",
+		"nginx/partial-deployment/green-web/deployments/old",
 	}
-	b, err = json.Marshal(currentDeployment)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-	srv.SetKV("nginx/partial-deployment/green-web/deployments/fancy", b)
+	obtain := srv.ListKV("nginx/partial-deployment/green-web/deployments")
+	sort.Sort(sort.StringSlice(obtain))
 
-	DeleteOldBranchDefinitions(srv.HTTPAddr, consul.Key("nginx/partial-deployment"))
-
-	keys := srv.ListKV("nginx/partial-deployment")
-	if len(keys) != 1 {
-		t.Logf("%+v", keys)
-		t.Fatalf("Expected 1 key, but got %d", len(keys))
-	}
-
-	if keys[0] != "nginx/partial-deployment/green-web/deployments/fancy" {
-		t.Fatalf("Deleted the wrong deployment.")
+	if reflect.DeepEqual(expect, obtain) {
+		t.Errorf("Deleted the wrong deployment.")
+		t.Errorf("Expected: %#v", expect)
+		t.Errorf("Obtained: %#v", obtain)
 	}
 }

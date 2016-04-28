@@ -12,3 +12,13 @@ type Deployment struct {
 }
 
 type Distribution map[string]string
+
+func (d *Distribution) Contains(branch string) bool {
+	for _, v := range *d {
+		if v == branch {
+			return true
+		}
+	}
+
+	return false
+}

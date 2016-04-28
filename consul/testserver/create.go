@@ -2,6 +2,7 @@ package testserver
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"testing"
 
@@ -30,4 +31,12 @@ func Create(t *testing.T) (*testutil.TestServer, func()) {
 	return srv, func() {
 		srv.Stop()
 	}
+}
+
+func SetJSON(t *testing.T, srv *testutil.TestServer, key string, value interface{}) {
+	data, err := json.Marshal(value)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	srv.SetKV(key, data)
 }
