@@ -16,7 +16,7 @@ func TestCleanupConsul(t *testing.T) {
 
 	srv.SetJSON(
 		"nginx/partial-deployment/green-web/deployments/master",
-		consul.Deployment{
+		consul.Branch{
 			"green-web",
 			"master",
 			time.Now(),
@@ -24,7 +24,7 @@ func TestCleanupConsul(t *testing.T) {
 		})
 	srv.SetJSON(
 		"nginx/partial-deployment/green-web/deployments/old",
-		consul.Deployment{
+		consul.Branch{
 			"green-web",
 			"old",
 			time.Now(),
@@ -32,7 +32,7 @@ func TestCleanupConsul(t *testing.T) {
 		})
 	srv.SetJSON(
 		"nginx/partial-deployment/green-web/deployments/ancient",
-		consul.Deployment{
+		consul.Branch{
 			"green-web",
 			"ancient",
 			time.Now(),
@@ -40,7 +40,7 @@ func TestCleanupConsul(t *testing.T) {
 		})
 	srv.SetJSON(
 		"nginx/partial-deployment/green-web/deployments/fancy:",
-		consul.Deployment{
+		consul.Branch{
 			"green-web",
 			"fancy",
 			time.Now(),

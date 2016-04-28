@@ -28,28 +28,25 @@ func New(agent string, namespace Key) (*Client, error) {
 	return c, nil
 }
 
-func (c *Client) GetProjects() ([]string, error) {
+func (c *Client) GetProjects() (Projects, error) {
 	kv := c.client.KV()
 	pairs, _, err := kv.List(string(c.namespace), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	keyMap := make(map[string]bool)
+	projects := make(Projects, 0)
 	for _, pair := range pairs {
-		key := Key(pair.Key).Base(c.namespace).Get(0)
-		keyMap[key] = true
+		project := Key(pair.Key).Base(c.namespace).Get(0)
+		if !projects.Contains(project) {
+			projects = append(projects, project)
+		}
 	}
 
-	keys := make([]string, 0)
-	for key, _ := range keyMap {
-		keys = append(keys, key)
-	}
-
-	return keys, nil
+	return projects, nil
 }
 
-func (c *Client) GetDeployments(project string) (Deployments, error) {
+func (c *Client) GetBranches(project string) (Branches, error) {
 	ns := c.namespace.Add(project).Add("deployments")
 
 	kv := c.client.KV()
@@ -58,28 +55,27 @@ func (c *Client) GetDeployments(project string) (Deployments, error) {
 		return nil, err
 	}
 
-	deployments := make(Deployments, 0)
+	branches := make(Branches, 0)
 	for _, pair := range pairs {
-		branch := Key(pair.Key).Base(ns).Get(0)
+		name := Key(pair.Key).Base(ns).Get(0)
 
-		var deployment Deployment
-		err = json.Unmarshal(pair.Value, &deployment)
+		var branch Branch
+		err = json.Unmarshal(pair.Value, &branch)
 		if err != nil {
 			return nil, err
 		}
 
-		deployment.Project = project
-		deployment.Branch = branch
+		branch.Project = project
+		branch.Name = name
 
-		deployments = append(deployments, &deployment)
+		branches = append(branches, &branch)
 	}
 
-	return deployments, nil
-
+	return branches, nil
 }
 
-func (c *Client) RemoveDeployment(d *Deployment) error {
-	key := c.namespace.Add(d.Project).Add("deployments").Add(d.Branch)
+func (c *Client) RemoveBranch(branch *Branch) error {
+	key := c.namespace.Add(branch.Project).Add("deployments").Add(branch.Name)
 	kv := c.client.KV()
 	_, err := kv.Delete(string(key), nil)
 	return err

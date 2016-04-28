@@ -2,6 +2,7 @@ package consul
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -26,23 +27,12 @@ func TestGetProjects(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	inArray := make(map[string]bool)
-	for _, key := range projects {
-		inArray[key] = true
-	}
+	expect := []string{"blue-web", "green-web"}
+	sort.Sort(sort.StringSlice(projects))
 
-	t.Logf(`Want []string{"green-web", "blue-web"}`)
-
-	if len(projects) != 2 {
-		t.Fatalf("Got %#v\n", projects)
-	}
-
-	if _, ok := inArray["green-web"]; !ok {
-		t.Fatalf("Got %#v\n", projects)
-	}
-
-	if _, ok := inArray["blue-web"]; !ok {
-		t.Fatalf("Got %#v\n", projects)
+	if !reflect.DeepEqual(expect, []string(projects)) {
+		t.Errorf("Obtained: %#v\n", projects)
+		t.Errorf("Expected: %#v\n", expect)
 	}
 }
 
@@ -61,29 +51,29 @@ func TestGetDeployments(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	deployments, err := client.GetDeployments("green-web")
+	branches, err := client.GetBranches("green-web")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
-	if len(deployments) != 1 {
-		t.Logf("%+v", deployments)
-		t.Fatalf("Expected 1 deployment, but got %d", len(deployments))
+	if len(branches) != 1 {
+		t.Logf("%+v", branches)
+		t.Fatalf("Expected 1 branch, but got %d", len(branches))
 	}
 
-	deployment := *deployments[0]
+	branch := *branches[0]
 
-	expect := Deployment{}
+	expect := Branch{}
 	expect.Project = "green-web"
-	expect.Branch = "master"
+	expect.Name = "master"
 	expect.CreatedAt = time.Unix(1335205543, 0)
 	expect.UpdatedAt = time.Unix(1335205543, 0)
 
-	if deployment.Project != "green-web" ||
-		deployment.Branch != "master" ||
-		deployment.CreatedAt.Unix() != 1335205543 ||
-		deployment.UpdatedAt.Unix() != 1335205543 {
-		t.Logf("Actual: %#v", deployment)
+	if branch.Project != "green-web" ||
+		branch.Name != "master" ||
+		branch.CreatedAt.Unix() != 1335205543 ||
+		branch.UpdatedAt.Unix() != 1335205543 {
+		t.Logf("Actual: %#v", branch)
 		t.Logf("Expect: %#v", expect)
 		t.Fatalf("Deployment doesn't equals expected value")
 	}
@@ -109,10 +99,10 @@ func TestRemoveDeployments(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	deployment := Deployment{}
-	deployment.Project = "green-web"
-	deployment.Branch = "fancy"
-	client.RemoveDeployment(&deployment)
+	branch := Branch{}
+	branch.Project = "green-web"
+	branch.Name = "fancy"
+	client.RemoveBranch(&branch)
 
 	keys := srv.List("nginx/partial-deployment")
 	if len(keys) != 1 {
@@ -121,7 +111,7 @@ func TestRemoveDeployments(t *testing.T) {
 	}
 
 	if keys[0] != "nginx/partial-deployment/green-web/deployments/master" {
-		t.Fatalf("Deleted the wrong deployment.")
+		t.Fatalf("Deleted the wrong branch.")
 	}
 }
 

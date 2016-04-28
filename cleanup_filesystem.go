@@ -13,8 +13,6 @@ func CleanupFilesystem(agent string, namespace consul.Key, path string) error {
 		return err
 	}
 
-	deployment := filesystem.Deployment(path)
-
 	projects, err := client.GetProjects()
 	if err != nil {
 		return err
@@ -22,21 +20,17 @@ func CleanupFilesystem(agent string, namespace consul.Key, path string) error {
 
 	log.Printf("Cleaning up these projects: %+v\n", projects)
 
+	fs := filesystem.Deployment(path)
+
 	for _, project := range projects {
-		deployed, err := deployment.ListBranches(project)
+		deployed, err := fs.GetBranches(project)
 		if err != nil {
 			return err
 		}
 
-		stored, err := client.GetDeployments(project)
+		consulDeployments, err := client.GetBranches(project)
 		if err != nil {
 			return err
-		}
-
-		storedSet := make(map[string]*consul.Deployment)
-		for _, d := range stored {
-			log.Printf("%#v", d.Branch)
-			storedSet[d.Branch] = d
 		}
 
 		for _, branch := range deployed {
@@ -46,7 +40,7 @@ func CleanupFilesystem(agent string, namespace consul.Key, path string) error {
 				continue
 			}
 
-			if _, ok := storedSet[branch]; ok {
+			if consulDeployments.Contains(branch) {
 				log.Printf("Keep branch %s/%s, because it is still stored in Consul",
 					project, branch)
 				continue
@@ -54,7 +48,7 @@ func CleanupFilesystem(agent string, namespace consul.Key, path string) error {
 
 			log.Printf("Deleting branch %s/%s, because there is no deployment in Consul",
 				project, branch)
-			deployment.Delete(project, branch)
+			fs.Remove(project, branch)
 		}
 	}
 

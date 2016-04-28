@@ -17,7 +17,7 @@ func TestList(t *testing.T) {
 	tmp.Branch("proj", "bar")
 
 	deployment := Deployment(tmp)
-	branches, err := deployment.ListBranches("proj")
+	branches, err := deployment.GetBranches("proj")
 	if err != nil {
 		t.Fatal(err.Error())
 	}

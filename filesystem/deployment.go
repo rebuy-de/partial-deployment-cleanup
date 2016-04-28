@@ -9,7 +9,7 @@ import (
 
 type Deployment string
 
-func (d *Deployment) Delete(project, branch string) {
+func (d *Deployment) Remove(project, branch string) {
 	directory := path.Join(string(*d), project, branch)
 
 	if branch == "master" {
@@ -39,7 +39,7 @@ func isDirectory(path string) bool {
 	return fileInfo.IsDir()
 }
 
-func (d *Deployment) ListBranches(project string) ([]string, error) {
+func (d *Deployment) GetBranches(project string) ([]string, error) {
 	directory := path.Join(string(*d), project)
 
 	fileInfos, err := ioutil.ReadDir(directory)

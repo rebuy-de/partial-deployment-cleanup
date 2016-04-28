@@ -28,7 +28,7 @@ func TestCleanupFilessystem(t *testing.T) {
 
 	srv.SetJSON(
 		"nginx/partial-deployment/green-web/deployments/master",
-		consul.Deployment{
+		consul.Branch{
 			"green-web",
 			"master",
 			time.Now(),
@@ -36,7 +36,7 @@ func TestCleanupFilessystem(t *testing.T) {
 		})
 	srv.SetJSON(
 		"nginx/partial-deployment/green-web/deployments/fancy",
-		consul.Deployment{
+		consul.Branch{
 			"green-web",
 			"fancy",
 			time.Now(),

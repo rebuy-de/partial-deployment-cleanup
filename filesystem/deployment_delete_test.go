@@ -14,7 +14,7 @@ func TestDeploymentDelete(t *testing.T) {
 	tmp.Branch("proj", "fancy")
 
 	deployment := Deployment(tmp)
-	deployment.Delete("proj", "fancy")
+	deployment.Remove("proj", "fancy")
 
 	dir := tmp.Path("proj", "fancy")
 	if isDirectory(dir) {
@@ -30,7 +30,7 @@ func TestDeploymentDeleteSkipMaster(t *testing.T) {
 	tmp.Branch("proj", "master")
 
 	deployment := Deployment(tmp)
-	deployment.Delete("proj", "master")
+	deployment.Remove("proj", "master")
 
 	dir := tmp.Path("proj", "master")
 	if !isDirectory(dir) {
@@ -48,7 +48,7 @@ func TestDeploymentDeleteSkip(t *testing.T) {
 
 		os.Remove(tmp.Path("proj", "fancy", sub))
 		deployment := Deployment(tmp)
-		deployment.Delete("proj", "fancy")
+		deployment.Remove("proj", "fancy")
 
 		dir := tmp.Path("proj", "fancy")
 		if !isDirectory(dir) {
