@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -16,13 +17,18 @@ const (
 
 var (
 	cleanupThreshold = 2 * Week
+	version          = "unknown"
 )
 
 func main() {
+	cli.VersionPrinter = func(c *cli.Context) {
+		fmt.Fprintf(c.App.Writer, "%v\n", c.App.Version)
+	}
+
 	app := cli.NewApp()
 	app.Name = "partial-deployment-cleanup"
 	app.Usage = "purges old branches and deployments"
-	app.HideVersion = true
+	app.Version = version
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "namespace",

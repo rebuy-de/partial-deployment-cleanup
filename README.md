@@ -8,9 +8,10 @@ Purges old branches and deployments
 
 ## Requirements
 
-* Go >= `1.6`
-* `glide` https://github.com/Masterminds/glide#install
-* since the test a starting a real Consul server, `consul` is required in your `$PATH`
+* `go` >= `1.6` for building (https://www.consul.io/)
+* `glide` for dependency management (https://github.com/Masterminds/glide#install)
+* `consul` for testing (https://www.consul.io/)
+* `fpm` for packaging (https://github.com/jordansissel/fpm)
 
 ## Testing
 
@@ -24,8 +25,18 @@ hack/test.sh
 hack/build.sh
 ```
 
+## Build RPM
+
+```bash
+hack/package.sh
+```
+
+* This gets the version from git, so make sure you have a proper tag and no 
+  uncommited changes in your workspace. Otherwise the version string will look
+  ugly (but still unambiguous).
+
 ## Use
 
 ```bash
-./partial-deployment-cleanup -h
+target/partial-deployment-cleanup -h
 ```
