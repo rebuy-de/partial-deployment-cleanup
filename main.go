@@ -40,6 +40,10 @@ func main() {
 			Value: "localhost:8500",
 			Usage: "host and port of the Consul agent. Should only be changed for development purposes",
 		},
+		cli.StringFlag{
+			Name:  "path",
+			Usage: "path for the deployment directory",
+		},
 	}
 
 	app.Commands = []cli.Command{
@@ -47,8 +51,8 @@ func main() {
 			Name:  "consul",
 			Usage: "cleanup old deployments from Consul",
 			Action: func(c *cli.Context) {
-				agent := c.String("agent")
-				namespace := c.String("namespace")
+				agent := c.GlobalString("agent")
+				namespace := c.GlobalString("namespace")
 
 				err := CleanupConsul(agent, consul.Key(namespace))
 				if err != nil {
@@ -60,16 +64,10 @@ func main() {
 		{
 			Name:  "filesystem",
 			Usage: "cleanup old deployments from filesystem",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:  "path",
-					Usage: "path for the deployment directory",
-				},
-			},
 			Action: func(c *cli.Context) {
-				agent := c.String("agent")
-				namespace := c.String("namespace")
-				path := c.String("path")
+				agent := c.GlobalString("agent")
+				namespace := c.GlobalString("namespace")
+				path := c.GlobalString("path")
 
 				err := CleanupFilesystem(agent, consul.Key(namespace), path)
 				if err != nil {
