@@ -42,6 +42,7 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  "path",
+			Value: "/opt/www",
 			Usage: "path for the deployment directory",
 		},
 	}
