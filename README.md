@@ -9,7 +9,6 @@ Purges old branches and deployments
 ## Requirements
 
 * `go` >= `1.6` for building (https://golang.org/)
-* `consul` for testing (https://www.consul.io/)
 * `fpm` for packaging (https://github.com/jordansissel/fpm)
 
 ## Testing
