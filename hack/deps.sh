@@ -3,4 +3,4 @@
 cd $( dirname $0 )/..
 set -ex
 
-glide install
+hack/glidew.sh install

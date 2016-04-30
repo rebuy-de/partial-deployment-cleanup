@@ -8,8 +8,7 @@ Purges old branches and deployments
 
 ## Requirements
 
-* `go` >= `1.6` for building (https://www.consul.io/)
-* `glide` for dependency management (https://github.com/Masterminds/glide#install)
+* `go` >= `1.6` for building (https://golang.org/)
 * `consul` for testing (https://www.consul.io/)
 * `fpm` for packaging (https://github.com/jordansissel/fpm)
 
