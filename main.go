@@ -77,6 +77,24 @@ func main() {
 				}
 			},
 		},
+		{
+			Name:  "verify",
+			Usage: "verify Consul configuration against filesystem",
+			Action: func(c *cli.Context) {
+				agent := c.GlobalString("agent")
+				namespace := c.GlobalString("namespace")
+				path := c.GlobalString("path")
+
+				err := Verify(agent, consul.Key(namespace), path)
+				if err == VerificationFailed {
+					log.Print(err.Error())
+					os.Exit(2)
+				} else if err != nil {
+					log.Print(err.Error())
+					os.Exit(1)
+				}
+			},
+		},
 	}
 
 	app.Run(os.Args)

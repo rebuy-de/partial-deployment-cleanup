@@ -20,6 +20,16 @@ func (branches *Branches) Contains(branch string) bool {
 	return false
 }
 
+func (branches *Branches) Slice() []string {
+	slice := make([]string, 0)
+
+	for _, b := range *branches {
+		slice = append(slice, b.Name)
+	}
+
+	return slice
+}
+
 type Distribution map[string]string
 
 func (d *Distribution) Contains(branch string) bool {
@@ -30,6 +40,20 @@ func (d *Distribution) Contains(branch string) bool {
 	}
 
 	return false
+}
+
+func (d *Distribution) BranchSlice() []string {
+	pseudoMap := make(map[string]bool)
+	for _, v := range *d {
+		pseudoMap[v] = true
+	}
+
+	slice := make([]string, 0)
+	for b, _ := range pseudoMap {
+		slice = append(slice, b)
+	}
+
+	return slice
 }
 
 type Projects []string
