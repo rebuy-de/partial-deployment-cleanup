@@ -3,4 +3,5 @@
 cd $( dirname $0 )/..
 set -ex
 
-glide install
+hack/consulw.sh version
+hack/glidew.sh install
