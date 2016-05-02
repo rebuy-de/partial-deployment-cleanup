@@ -24,8 +24,8 @@ func TestList(t *testing.T) {
 
 	expect := []string{"bar", "fancy", "foo", "master"}
 
-	if !reflect.DeepEqual(branches, expect) {
+	if !reflect.DeepEqual([]string(branches), expect) {
 		t.Errorf("Expected: %#v", expect)
-		t.Errorf("Obtained: %#v", branches)
+		t.Errorf("Obtained: %#v", []string(branches))
 	}
 }

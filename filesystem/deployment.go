@@ -39,7 +39,7 @@ func isDirectory(path string) bool {
 	return fileInfo.IsDir()
 }
 
-func (d *Deployment) GetBranches(project string) ([]string, error) {
+func (d *Deployment) GetBranches(project string) (Branches, error) {
 	directory := path.Join(string(*d), project)
 
 	fileInfos, err := ioutil.ReadDir(directory)

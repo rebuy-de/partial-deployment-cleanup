@@ -1,13 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/rebuy-de/partial-deployment-cleanup/consul"
 	"github.com/rebuy-de/partial-deployment-cleanup/filesystem"
 )
 
-func CleanupFilesystem(agent string, namespace consul.Key, path string) error {
+var (
+	VerificationFailed = fmt.Errorf("Verification failed!")
+)
+
+func Verify(agent string, namespace consul.Key, path string) error {
 	log.Printf("Cleaning up file system with these parameters:")
 	log.Printf("    agent:     %#v", agent)
 	log.Printf("    namespace: %#v", namespace)
@@ -27,6 +32,8 @@ func CleanupFilesystem(agent string, namespace consul.Key, path string) error {
 
 	fs := filesystem.Deployment(path)
 
+	failed := false
+
 	for _, project := range projects {
 		directories, err := fs.GetBranches(project)
 		if err != nil {
@@ -43,29 +50,27 @@ func CleanupFilesystem(agent string, namespace consul.Key, path string) error {
 			return err
 		}
 
-		for _, branch := range directories {
-			if branch == "master" {
-				log.Printf("Keep branch %s/%s, because it is master.",
-					project, branch)
-				continue
-			}
+		log.Printf("%#v has these branches on disk:     %+v", project, directories)
+		log.Printf("%#v has these branches defined:     %+v", project, branches.Slice())
+		log.Printf("%#v has these branches distributed: %+v", project, distribution.BranchSlice())
 
-			if branches.Contains(branch) {
-				log.Printf("Keep branch %s/%s, because it is still stored in Consul",
-					project, branch)
-				continue
+		for _, branch := range branches {
+			if !directories.Contains(branch.Name) {
+				log.Printf("%s/%s is defined on Consul, but don't exists on disk!", project, branch.Name)
+				failed = true
 			}
-
-			if distribution.Contains(branch) {
-				log.Printf("Keep branch %s/%s, because it is still listed in the distibution",
-					project, branch)
-				continue
-			}
-
-			log.Printf("Deleting branch %s/%s, because there is no deployment in Consul",
-				project, branch)
-			fs.Remove(project, branch)
 		}
+
+		for _, branch := range distribution {
+			if !directories.Contains(branch) {
+				log.Printf("%s/%s is distributed in Consul, but don't exists on disk!", project, branch)
+				failed = true
+			}
+		}
+	}
+
+	if failed {
+		return VerificationFailed
 	}
 
 	return nil
