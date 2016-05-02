@@ -21,6 +21,7 @@ func TestCleanupFilessystem(t *testing.T) {
 	tmp.Branch("green-web", "fancy")
 	tmp.Branch("green-web", "master")
 	tmp.Branch("green-web", "old")
+	tmp.Branch("green-web", "orphan")
 	tmp.Branch("silo", "master")
 	tmp.Branch("silo", "blubber")
 	tmp.Branch("other", "master")
@@ -48,7 +49,8 @@ func TestCleanupFilessystem(t *testing.T) {
 			"2":"fancy",
 			"3":"fancy",
 			"4":"master",
-			"5":"master"
+			"5":"master",
+			"6":"orphan"
 		}`)
 	srv.Set("nginx/partial-deployment/other/distribution",
 		`{
@@ -83,6 +85,7 @@ func TestCleanupFilessystem(t *testing.T) {
 	expect := []string{
 		"green-web/fancy",
 		"green-web/master",
+		"green-web/orphan",
 		"other/master",
 		"silo/blubber",
 		"silo/master",

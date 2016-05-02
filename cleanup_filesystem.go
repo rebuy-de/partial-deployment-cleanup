@@ -28,25 +28,36 @@ func CleanupFilesystem(agent string, namespace consul.Key, path string) error {
 	fs := filesystem.Deployment(path)
 
 	for _, project := range projects {
-		deployed, err := fs.GetBranches(project)
+		directories, err := fs.GetBranches(project)
 		if err != nil {
 			return err
 		}
 
-		consulDeployments, err := client.GetBranches(project)
+		branches, err := client.GetBranches(project)
 		if err != nil {
 			return err
 		}
 
-		for _, branch := range deployed {
+		distribution, err := client.GetDistribution(project)
+		if err != nil {
+			return err
+		}
+
+		for _, branch := range directories {
 			if branch == "master" {
 				log.Printf("Keep branch %s/%s, because it is master.",
 					project, branch)
 				continue
 			}
 
-			if consulDeployments.Contains(branch) {
+			if branches.Contains(branch) {
 				log.Printf("Keep branch %s/%s, because it is still stored in Consul",
+					project, branch)
+				continue
+			}
+
+			if distribution.Contains(branch) {
+				log.Printf("Keep branch %s/%s, because it is still listed in the distibution",
 					project, branch)
 				continue
 			}
