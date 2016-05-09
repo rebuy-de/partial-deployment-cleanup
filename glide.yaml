@@ -7,3 +7,6 @@ import:
   - testutil
 - package: github.com/codegangsta/cli
   version: ^v1.14.0
+- package: github.com/SocialCodeInc/go-gelf
+  subpackages:
+  - gelf

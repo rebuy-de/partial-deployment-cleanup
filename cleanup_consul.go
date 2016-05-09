@@ -8,9 +8,10 @@ import (
 )
 
 func CleanupConsul(agent string, namespace consul.Key) error {
-	log.Printf("Cleaning up Consul with these parameters:")
-	log.Printf("    agent:     %#v", agent)
-	log.Printf("    namespace: %#v", namespace)
+	log.Printf("Cleaning up Consul with these parameters:\n"+
+		"    agent:     %#v\n"+
+		"    namespace: %#v",
+		agent, namespace)
 
 	client, err := consul.New(agent, namespace)
 	if err != nil {

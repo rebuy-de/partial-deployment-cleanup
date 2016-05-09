@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"time"
 
+	"github.com/SocialCodeInc/go-gelf/gelf"
 	"github.com/codegangsta/cli"
 	"github.com/rebuy-de/partial-deployment-cleanup/consul"
 )
@@ -45,56 +47,81 @@ func main() {
 			Value: "/opt/www",
 			Usage: "path for the deployment directory",
 		},
+		cli.StringFlag{
+			Name:  "graylog-address",
+			Usage: "address of the Graylog server",
+		},
+		cli.BoolFlag{
+			Name:  "quiet",
+			Usage: "reduce log output",
+		},
 	}
 
 	app.Commands = []cli.Command{
 		{
 			Name:  "consul",
 			Usage: "cleanup old deployments from Consul",
-			Action: func(c *cli.Context) {
+			Action: func(c *cli.Context) error {
 				agent := c.GlobalString("agent")
 				namespace := c.GlobalString("namespace")
 
-				err := CleanupConsul(agent, consul.Key(namespace))
-				if err != nil {
-					log.Print(err.Error())
-					os.Exit(1)
-				}
+				return CleanupConsul(agent, consul.Key(namespace))
 			},
 		},
 		{
 			Name:  "filesystem",
 			Usage: "cleanup old deployments from filesystem",
-			Action: func(c *cli.Context) {
+			Action: func(c *cli.Context) error {
 				agent := c.GlobalString("agent")
 				namespace := c.GlobalString("namespace")
 				path := c.GlobalString("path")
 
-				err := CleanupFilesystem(agent, consul.Key(namespace), path)
-				if err != nil {
-					log.Print(err.Error())
-					os.Exit(1)
-				}
+				return CleanupFilesystem(agent, consul.Key(namespace), path)
 			},
 		},
 		{
 			Name:  "verify",
 			Usage: "verify Consul configuration against filesystem",
-			Action: func(c *cli.Context) {
+			Action: func(c *cli.Context) error {
 				agent := c.GlobalString("agent")
 				namespace := c.GlobalString("namespace")
 				path := c.GlobalString("path")
 
 				err := Verify(agent, consul.Key(namespace), path)
 				if err == VerificationFailed {
-					log.Print(err.Error())
+					fmt.Printf("CRITICAL - %s\n", err.Error())
 					os.Exit(2)
 				} else if err != nil {
-					log.Print(err.Error())
-					os.Exit(1)
+					fmt.Printf("ERROR - %s\n", err.Error())
+					os.Exit(3)
 				}
+
+				fmt.Printf("OK - Existing directories match Consul state\n")
+
+				return nil
 			},
 		},
+	}
+
+	app.Before = func(c *cli.Context) error {
+		writers := make([]io.Writer, 0)
+
+		if !c.GlobalBool("quiet") {
+			writers = append(writers, os.Stdout)
+		}
+
+		if c.IsSet("graylog-address") {
+			addr := c.GlobalString("graylog-address")
+			gelfWriter, err := gelf.NewWriter(addr)
+			if err != nil {
+				return err
+			}
+			writers = append(writers, gelfWriter)
+		}
+
+		log.SetOutput(io.MultiWriter(writers...))
+
+		return nil
 	}
 
 	app.Run(os.Args)
