@@ -13,10 +13,11 @@ var (
 )
 
 func Verify(agent string, namespace consul.Key, path string) error {
-	log.Printf("Cleaning up file system with these parameters:")
-	log.Printf("    agent:     %#v", agent)
-	log.Printf("    namespace: %#v", namespace)
-	log.Printf("    path:      %#v", path)
+	log.Printf("Cleaning up file system with these parameters:\n"+
+		"    agent:     %#v\n"+
+		"    namespace: %#v\n"+
+		"    path:      %#v",
+		agent, namespace, path)
 
 	client, err := consul.New(agent, namespace)
 	if err != nil {
