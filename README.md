@@ -1,6 +1,6 @@
 # partial-deployment-cleanup
 
-Purges old branches and deployments
+Purges old branches and deployments for our partial deployment solution.
 
 ## Primary responsible person (PRP)
 
