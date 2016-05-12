@@ -22,6 +22,15 @@ var (
 	version          = "unknown"
 )
 
+func wrapError(err error) cli.ExitCoder {
+	if err != nil {
+		msg := fmt.Sprintf("ERROR - (%T) %s", err, err.Error())
+		return cli.NewExitError(msg, 3)
+	}
+
+	return nil
+}
+
 func main() {
 	cli.VersionPrinter = func(c *cli.Context) {
 		fmt.Fprintf(c.App.Writer, "%v\n", c.App.Version)
@@ -65,7 +74,8 @@ func main() {
 				agent := c.GlobalString("agent")
 				namespace := c.GlobalString("namespace")
 
-				return CleanupConsul(agent, consul.Key(namespace))
+				err := CleanupConsul(agent, consul.Key(namespace))
+				return wrapError(err)
 			},
 		},
 		{
@@ -76,7 +86,8 @@ func main() {
 				namespace := c.GlobalString("namespace")
 				path := c.GlobalString("path")
 
-				return CleanupFilesystem(agent, consul.Key(namespace), path)
+				err := CleanupFilesystem(agent, consul.Key(namespace), path)
+				return wrapError(err)
 			},
 		},
 		{
