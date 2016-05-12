@@ -24,7 +24,7 @@ func CleanupFilesystem(agent string, namespace consul.Key, path string) error {
 		return err
 	}
 
-	log.Printf("Handling these projects: %+v\n", projects)
+	log.Printf("Found these projects: %+v\n", projects)
 
 	fs := filesystem.Deployment(path)
 
@@ -33,6 +33,8 @@ func CleanupFilesystem(agent string, namespace consul.Key, path string) error {
 		if err != nil {
 			return err
 		}
+
+		log.Printf("Found these directories in %#v: %+v\n", project, directories)
 
 		branches, err := client.GetBranches(project)
 		if err != nil {
