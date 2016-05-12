@@ -37,7 +37,10 @@ func Verify(agent string, namespace consul.Key, path string) error {
 
 	for _, project := range projects {
 		directories, err := fs.GetBranches(project)
-		if err != nil {
+		if err == filesystem.ProjectDirectoryNotFound {
+			log.Printf("Skipping project %#v, because project directory doesn't exists.", project)
+			continue
+		} else if err != nil {
 			return err
 		}
 
@@ -62,8 +65,11 @@ func Verify(agent string, namespace consul.Key, path string) error {
 			}
 		}
 
+		found := make(map[string]bool)
 		for _, branch := range distribution {
-			if !directories.Contains(branch) {
+			ok := found[branch]
+			if !directories.Contains(branch) && !ok {
+				found[branch] = true
 				log.Printf("%s/%s is distributed in Consul, but don't exists on disk!", project, branch)
 				failed = true
 			}

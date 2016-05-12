@@ -24,17 +24,18 @@ func CleanupFilesystem(agent string, namespace consul.Key, path string) error {
 		return err
 	}
 
-	log.Printf("Found these projects: %+v\n", projects)
+	log.Printf("Handling these projects: %+v\n", projects)
 
 	fs := filesystem.Deployment(path)
 
 	for _, project := range projects {
 		directories, err := fs.GetBranches(project)
-		if err != nil {
+		if err == filesystem.ProjectDirectoryNotFound {
+			log.Printf("Skipping project %#v, because project directory doesn't exists.", project)
+			continue
+		} else if err != nil {
 			return err
 		}
-
-		log.Printf("Found these directories in %#v: %+v\n", project, directories)
 
 		branches, err := client.GetBranches(project)
 		if err != nil {
