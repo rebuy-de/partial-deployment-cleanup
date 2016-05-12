@@ -60,7 +60,7 @@ func Verify(agent string, namespace consul.Key, path string) error {
 
 		for _, branch := range branches {
 			if !directories.Contains(branch.Name) {
-				log.Printf("%s/%s is defined on Consul, but don't exists on disk!", project, branch.Name)
+				log.Printf("%s/%s is defined on Consul, but doesn't exist on disk!", project, branch.Name)
 				failed = true
 			}
 		}
@@ -70,7 +70,7 @@ func Verify(agent string, namespace consul.Key, path string) error {
 			ok := found[branch]
 			if !directories.Contains(branch) && !ok {
 				found[branch] = true
-				log.Printf("%s/%s is distributed in Consul, but don't exists on disk!", project, branch)
+				log.Printf("%s/%s is distributed in Consul, but doesn't exist on disk!", project, branch)
 				failed = true
 			}
 		}
