@@ -40,7 +40,7 @@ func TestDeploymentDeleteSkipMaster(t *testing.T) {
 }
 
 func TestDeploymentDeleteSkip(t *testing.T) {
-	for _, sub := range []string{"current", "release", "shared"} {
+	for _, sub := range []string{"current", "releases", "shared"} {
 		tmp := testutil.CreateDirectory(t)
 		defer tmp.Clean()
 

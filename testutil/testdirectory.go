@@ -31,7 +31,7 @@ func (tmp *TestDirectory) Clean() {
 
 func (tmp *TestDirectory) Branch(project, branch string) {
 	os.MkdirAll(tmp.Path(project, branch), 0755)
-	for _, sub := range []string{"current", "release", "shared"} {
+	for _, sub := range []string{"current", "releases", "shared"} {
 		os.Mkdir(path.Join(tmp.Path(), project, branch, sub), 0755)
 	}
 }
