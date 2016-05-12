@@ -1,10 +1,15 @@
 package filesystem
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
+)
+
+var (
+	ProjectDirectoryNotFound = fmt.Errorf("Project directory does not exists.")
 )
 
 type Deployment string
@@ -41,6 +46,10 @@ func isDirectory(path string) bool {
 
 func (d *Deployment) GetBranches(project string) (Branches, error) {
 	directory := path.Join(string(*d), project)
+
+	if !isDirectory(directory) {
+		return nil, ProjectDirectoryNotFound
+	}
 
 	fileInfos, err := ioutil.ReadDir(directory)
 	if err != nil {

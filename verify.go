@@ -37,7 +37,10 @@ func Verify(agent string, namespace consul.Key, path string) error {
 
 	for _, project := range projects {
 		directories, err := fs.GetBranches(project)
-		if err != nil {
+		if err == filesystem.ProjectDirectoryNotFound {
+			log.Printf("Skipping project %#v, because project directory doesn't exists.", project)
+			continue
+		} else if err != nil {
 			return err
 		}
 
