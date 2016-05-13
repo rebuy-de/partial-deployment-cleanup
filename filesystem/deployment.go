@@ -23,7 +23,7 @@ func (d *Deployment) Remove(project, branch string) {
 		return
 	}
 
-	for _, sub := range []string{"current", "release", "shared"} {
+	for _, sub := range []string{"current", "releases", "shared"} {
 		if !isDirectory(path.Join(directory, sub)) {
 			log.Printf(`Aborting deletion of directory '%s', `+
 				`because it doesn't look like a deployment directory. `+
