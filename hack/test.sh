@@ -1,9 +1,5 @@
 #!/bin/bash
 
-cd $( dirname $0 )/..
-set -ex
+source $( dirname $0 )/deps.sh
 
-hack/deps.sh
-
-export PATH="$(readlink -f target/consul):${PATH}"
 go test -p 1 $(hack/glidew.sh novendor)
