@@ -1,18 +1,13 @@
 #/bin/bash
 
-cd $( dirname $0 )/..
-set -ex
-
-hack/build.sh
+source $( dirname $0)/build.sh
 
 cd target
 
 rm -rf ./usr/
 mkdir -p ./usr/bin/
 
-VERSION=$( ./partial-deployment-cleanup -v )
-
-cp partial-deployment-cleanup ./usr/bin/
+cp ${BINARY_NAME} ./usr/bin/partial-deployment-cleanup
 
 fpm \
 	-s dir \
