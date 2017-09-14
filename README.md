@@ -2,6 +2,10 @@
 
 Purges old branches and deployments for our partial deployment solution.
 
+## Development Status
+
+This project isn't used and maintained anymore.
+
 ## Primary responsible person (PRP)
 
 * [@prp-partial-deployment-cleanup](https://github.com/orgs/rebuy-de/teams/prp-partial-deployment-cleanup)
